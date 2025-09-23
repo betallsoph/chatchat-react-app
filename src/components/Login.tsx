@@ -108,7 +108,7 @@ const Login: FC = () => {
           </div>
         )}
         {errorMessage && (
-          <div className="success-message" style={{ color: '#b00020', background: '#fdecea', borderColor: '#f5c2c7' }} role="alert" aria-live="assertive">
+          <div className="error-banner" role="alert" aria-live="assertive">
             {errorMessage}
           </div>
         )}

@@ -103,6 +103,17 @@
   font-size: 14px;
 }
 
+/* Error banner */
+.error-banner {
+  color: #b00020;
+  background: #fdecea;
+  border: 1px solid #f5c2c7;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
 /* Password input wrapper */
 .password-input-wrapper {
   position: relative;

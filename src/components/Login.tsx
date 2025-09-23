@@ -1,16 +1,23 @@
-import { useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import './Login.css';
+import { auth } from '../firebase';
+import {
+  isSignInWithEmailLink,
+  sendSignInLinkToEmail,
+  signInWithEmailLink,
+  GoogleAuthProvider,
+  signInWithPopup
+} from 'firebase/auth';
 
 const Login: FC = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({ email: '' });
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const validateForm = () => {
-    const newErrors = { email: '', password: '' };
+  const validateEmail = () => {
+    const newErrors = { email: '' };
     let isValid = true;
 
     if (!email) {
@@ -21,33 +28,71 @@ const Login: FC = () => {
       isValid = false;
     }
 
-    if (!password) {
-      newErrors.password = 'Mật khẩu là bắt buộc';
-      isValid = false;
-    } else if (password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-      isValid = false;
-    }
-
     setErrors(newErrors);
     return isValid;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendEmailLink = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    setSuccessMessage('');
+    setErrorMessage('');
+    if (!validateEmail()) return;
 
-    setIsLoading(true);
-    
-    // Giả lập API call
-    setTimeout(() => {
-      setSuccessMessage(`Đăng nhập thành công! Email: ${email}`);
+    try {
+      setIsLoading(true);
+      const actionCodeSettings = {
+        url: window.location.origin + '/',
+        handleCodeInApp: true
+      };
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      window.localStorage.setItem('emailForSignIn', email);
+      setSuccessMessage('Đã gửi link đăng nhập tới email của bạn. Hãy mở email và nhấn vào liên kết để hoàn tất.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Có lỗi xảy ra khi gửi link.';
+      setErrorMessage(msg);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      setSuccessMessage('Đăng nhập Google thành công!');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Đăng nhập Google thất bại';
+      setErrorMessage(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Hoàn tất đăng nhập qua email link nếu user mở từ email
+  useEffect(() => {
+    const completeWithEmailLink = async () => {
+      try {
+        if (isSignInWithEmailLink(auth, window.location.href)) {
+          let storedEmail = window.localStorage.getItem('emailForSignIn') || '';
+          if (!storedEmail) {
+            // Fallback: yêu cầu người dùng nhập email nếu không có trong localStorage
+            storedEmail = window.prompt('Vui lòng nhập email bạn đã dùng để nhận liên kết:') || '';
+          }
+          if (storedEmail) {
+            await signInWithEmailLink(auth, storedEmail, window.location.href);
+            window.localStorage.removeItem('emailForSignIn');
+            setSuccessMessage('Đăng nhập qua email link thành công!');
+          }
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Không thể hoàn tất đăng nhập qua email link';
+        setErrorMessage(msg);
+      }
+    };
+    void completeWithEmailLink();
+  }, []);
 
   return (
     <div className="login-container">
@@ -62,8 +107,13 @@ const Login: FC = () => {
             {successMessage}
           </div>
         )}
+        {errorMessage && (
+          <div className="success-message" style={{ color: '#b00020', background: '#fdecea', borderColor: '#f5c2c7' }} role="alert" aria-live="assertive">
+            {errorMessage}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSendEmailLink} className="login-form">
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -76,35 +126,8 @@ const Login: FC = () => {
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Mật khẩu</label>
-            <div className="password-input-wrapper">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nhập mật khẩu"
-                className={errors.password ? 'error' : ''}
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
-            </div>
-            {errors.password && <span className="error-message">{errors.password}</span>}
-          </div>
-
-          <div className="form-options">
-            <label className="remember-me">
-              <input type="checkbox" />
-              <span>Ghi nhớ đăng nhập</span>
-            </label>
-            <a href="#" className="forgot-password">Quên mật khẩu?</a>
+          <div className="form-options" style={{ justifyContent: 'flex-start' }}>
+            <span style={{ color: '#666', fontSize: 14 }}>Đăng nhập bằng liên kết gửi qua email (không cần mật khẩu)</span>
           </div>
 
           <button 
@@ -113,9 +136,9 @@ const Login: FC = () => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <span className="loading-spinner">⏳ Đang đăng nhập...</span>
+              <span className="loading-spinner">⏳ Đang gửi liên kết...</span>
             ) : (
-              'Đăng nhập'
+              'Gửi liên kết đăng nhập qua email'
             )}
           </button>
         </form>
@@ -125,16 +148,13 @@ const Login: FC = () => {
         </div>
 
         <div className="social-login">
-          <button className="social-button google">
-            <span>🔵</span> Đăng nhập với Google
-          </button>
-          <button className="social-button facebook">
-            <span>📘</span> Đăng nhập với Facebook
+          <button className="social-button google" onClick={handleGoogleSignIn} disabled={isLoading}>
+            <span>🟢</span> Đăng nhập với Google
           </button>
         </div>
 
         <div className="login-footer">
-          <p>Chưa có tài khoản? <a href="#">Đăng ký ngay</a></p>
+          <p>Bằng việc tiếp tục, bạn đồng ý với điều khoản sử dụng của chúng tôi.</p>
         </div>
       </div>
     </div>

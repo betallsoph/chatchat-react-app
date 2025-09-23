@@ -92,6 +92,17 @@
   display: block;
 }
 
+/* Success message */
+.success-message {
+  color: #2e7d32;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
 /* Password input wrapper */
 .password-input-wrapper {
   position: relative;

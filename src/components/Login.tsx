@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import { useState, type FC } from 'react';
 import './Login.css';
 
-const Login: React.FC = () => {
+const Login: FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const [successMessage, setSuccessMessage] = useState('');
 
   const validateForm = () => {
     const newErrors = { email: '', password: '' };
@@ -43,8 +44,7 @@ const Login: React.FC = () => {
     
     // Giả lập API call
     setTimeout(() => {
-      console.log('Đăng nhập với:', { email, password });
-      alert(`Đăng nhập thành công!\nEmail: ${email}`);
+      setSuccessMessage(`Đăng nhập thành công! Email: ${email}`);
       setIsLoading(false);
     }, 2000);
   };
@@ -56,6 +56,12 @@ const Login: React.FC = () => {
           <h1>Chào mừng trở lại</h1>
           <p>Đăng nhập vào tài khoản của bạn</p>
         </div>
+
+        {successMessage && (
+          <div className="success-message" role="status" aria-live="polite">
+            {successMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">

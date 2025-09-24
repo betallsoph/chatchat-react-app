@@ -1,6 +1,7 @@
 import { useEffect, useState, type FC } from 'react';
 import './Login.css';
 import { auth } from '../firebase';
+import googleSignInBtn from '../../signin-assets/Web (mobile + desktop)/svg/light/web_light_rd_SI.svg';
 import {
   isSignInWithEmailLink,
   sendSignInLinkToEmail,
@@ -160,8 +161,22 @@ const Login: FC = () => {
         </div>
 
         <div className="social-login">
-          <button className="social-button google" onClick={handleGoogleSignIn} disabled={isLoading}>
-            <span>🟢</span> Đăng nhập với Google
+          <button
+            className="social-button google"
+            onClick={handleGoogleSignIn}
+            disabled={isLoading}
+            style={{
+              padding: 0,
+              border: 'none',
+              background: 'transparent',
+            }}
+            aria-label="Đăng nhập với Google"
+          >
+            <img
+              src={googleSignInBtn}
+              alt="Sign in with Google"
+              style={{ height: 40 }}
+            />
           </button>
         </div>
 

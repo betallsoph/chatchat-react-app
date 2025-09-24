@@ -270,6 +270,21 @@
   font-size: 20px;
 }
 
+/* Override cho nút Google dạng ảnh (asset) */
+.social-button.google {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.social-button.google:hover {
+  background: transparent;
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Footer */
 .login-footer {
   text-align: center;

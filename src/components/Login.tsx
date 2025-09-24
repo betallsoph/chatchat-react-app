@@ -6,7 +6,9 @@ import {
   sendSignInLinkToEmail,
   signInWithEmailLink,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 
 const Login: FC = () => {
@@ -60,8 +62,13 @@ const Login: FC = () => {
       setIsLoading(true);
       setErrorMessage('');
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      setSuccessMessage('Đăng nhập Google thành công!');
+      try {
+        await signInWithPopup(auth, provider);
+        setSuccessMessage('Đăng nhập Google thành công!');
+      } catch (popupErr) {
+        // Nếu trình duyệt chặn popup hoặc lỗi liên quan popup → fallback sang redirect
+        await signInWithRedirect(auth, provider);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Đăng nhập Google thất bại';
       setErrorMessage(msg);
@@ -85,6 +92,11 @@ const Login: FC = () => {
             window.localStorage.removeItem('emailForSignIn');
             setSuccessMessage('Đăng nhập qua email link thành công!');
           }
+        }
+        // Xử lý kết quả redirect từ Google (nếu có)
+        const redirectResult = await getRedirectResult(auth);
+        if (redirectResult?.user) {
+          setSuccessMessage('Đăng nhập Google thành công!');
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Không thể hoàn tất đăng nhập qua email link';

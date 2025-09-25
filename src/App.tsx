@@ -4,8 +4,7 @@ import { onAuthStateChanged, type User } from 'firebase/auth'
 import { auth } from './firebase'
 import Login from './components/Login'
 import Home from './pages/Home'
-import ChatList from './pages/ChatList'
-import ChatRoom from './pages/ChatRoom'
+import Chat from './pages/Chat'
 
 function ProtectedRoute({ user, children }: { user: User | null, children: ReactElement }) {
   if (!user) return <Navigate to="/login" replace />
@@ -44,11 +43,11 @@ function App() {
         />
         <Route
           path="/chat"
-          element={<ProtectedRoute user={user}><ChatList /></ProtectedRoute>}
+          element={<ProtectedRoute user={user}><Chat /></ProtectedRoute>}
         />
         <Route
           path="/chat/:roomId"
-          element={<ProtectedRoute user={user}><ChatRoom /></ProtectedRoute>}
+          element={<ProtectedRoute user={user}><Chat /></ProtectedRoute>}
         />
         <Route
           path="/login"

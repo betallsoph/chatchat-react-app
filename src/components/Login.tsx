@@ -6,11 +6,11 @@ import {
   isSignInWithEmailLink,
   sendSignInLinkToEmail,
   signInWithEmailLink,
-  GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult
 } from 'firebase/auth';
+import { googleProvider } from '../firebase';
 
 const Login: FC = () => {
   const [email, setEmail] = useState('');
@@ -62,13 +62,13 @@ const Login: FC = () => {
     try {
       setIsLoading(true);
       setErrorMessage('');
-      const provider = new GoogleAuthProvider();
       try {
-        await signInWithPopup(auth, provider);
+        await signInWithPopup(auth, googleProvider);
         setSuccessMessage('Đăng nhập Google thành công!');
+        navigate('/chat', { replace: true });
       } catch (popupErr) {
         // Nếu trình duyệt chặn popup hoặc lỗi liên quan popup → fallback sang redirect
-        await signInWithRedirect(auth, provider);
+        await signInWithRedirect(auth, googleProvider);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Đăng nhập Google thất bại';

@@ -1,9 +1,11 @@
 import { type FC, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../firebase';
+import { fetchWithToken } from '../utils/api';
 
 const Home: FC = () => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -12,9 +14,14 @@ const Home: FC = () => {
     return () => unsub();
   }, []);
 
+  // Không còn load phòng — mô hình chat chung
+
   const handleSignOut = async () => {
     try {
       setIsSigningOut(true);
+      try {
+        await fetchWithToken('/api/auth/logout', { method: 'POST' });
+      } catch {}
       await signOut(auth);
     } finally {
       setIsSigningOut(false);
@@ -54,9 +61,11 @@ const Home: FC = () => {
           {isSigningOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
         </button>
         <div style={{ height: 12 }} />
-        <Link to="/chat" style={{ display: 'inline-block', padding: '12px 16px', borderRadius: 10, background: '#4f46e5', color: 'white', fontWeight: 600, textDecoration: 'none' }}>
-          Mở Chat
-        </Link>
+        
+        <div style={{ height: 12 }} />
+        <button onClick={() => navigate('/chat')} style={{ display: 'inline-block', padding: '12px 16px', borderRadius: 10, background: '#4f46e5', color: 'white', fontWeight: 600, border: 'none', cursor: 'pointer' }}>
+          Vào phòng chat chung
+        </button>
       </div>
     </div>
   );

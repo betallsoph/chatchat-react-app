@@ -1,4 +1,5 @@
 import { type FC, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -52,6 +53,10 @@ const Home: FC = () => {
         >
           {isSigningOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
         </button>
+        <div style={{ height: 12 }} />
+        <Link to="/chat" style={{ display: 'inline-block', padding: '12px 16px', borderRadius: 10, background: '#4f46e5', color: 'white', fontWeight: 600, textDecoration: 'none' }}>
+          Mở Chat
+        </Link>
       </div>
     </div>
   );

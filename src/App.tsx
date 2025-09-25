@@ -4,6 +4,7 @@ import { onAuthStateChanged, type User } from 'firebase/auth'
 import { auth } from './firebase'
 import Login from './components/Login'
 import Home from './pages/Home'
+import Chat from './pages/Chat'
 
 function ProtectedRoute({ user, children }: { user: User | null, children: ReactElement }) {
   if (!user) return <Navigate to="/login" replace />
@@ -36,15 +37,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={<ProtectedRoute user={user}><Home /></ProtectedRoute>}
-        />
+        <Route path="/" element={<ProtectedRoute user={user}><Home /></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute user={user}><Chat /></ProtectedRoute>} />
         <Route
           path="/login"
           element={user ? <Navigate to="/" replace /> : <Login />}
         />
-        <Route path="*" element={<Navigate to={user ? '/' : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={user ? '/chat' : '/login'} replace />} />
       </Routes>
     </BrowserRouter>
   )

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import { auth } from '../firebase';
 import googleSignInBtn from '../../signin-assets/Web (mobile + desktop)/svg/light/web_light_rd_SI.svg';
@@ -13,6 +14,7 @@ import {
 } from 'firebase/auth';
 
 const Login: FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '' });
@@ -59,13 +61,14 @@ const Login: FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    try {
+      try {
       setIsLoading(true);
       setErrorMessage('');
       const provider = new GoogleAuthProvider();
       try {
         await signInWithPopup(auth, provider);
         setSuccessMessage('Đăng nhập Google thành công!');
+          navigate('/chat', { replace: true });
       } catch (popupErr) {
         // Nếu trình duyệt chặn popup hoặc lỗi liên quan popup → fallback sang redirect
         await signInWithRedirect(auth, provider);
@@ -92,12 +95,14 @@ const Login: FC = () => {
             await signInWithEmailLink(auth, storedEmail, window.location.href);
             window.localStorage.removeItem('emailForSignIn');
             setSuccessMessage('Đăng nhập qua email link thành công!');
+            navigate('/chat', { replace: true });
           }
         }
         // Xử lý kết quả redirect từ Google (nếu có)
         const redirectResult = await getRedirectResult(auth);
         if (redirectResult?.user) {
           setSuccessMessage('Đăng nhập Google thành công!');
+          navigate('/chat', { replace: true });
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Không thể hoàn tất đăng nhập qua email link';
